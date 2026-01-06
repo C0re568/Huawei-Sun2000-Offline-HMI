@@ -20,6 +20,7 @@ You are a Senior Embedded Systems Engineer expert in:
     * `-D TFT_D0=39` through `-D TFT_D7=48`
     * `-D TFT_BL=38` (Backlight)
     * `-D LOAD_GLCD`, `-D LOAD_FONT2`, `-D LOAD_FONT4` (Fonts)
+* **Dependencies:** Add `lvgl` to `lib_deps` in `platformio.ini` for UI library support.
 * **USB Mode:** Ensure `USB_CDC_ON_BOOT` is enabled so standard `Serial` works over USB while we use `Serial1` for RS485.
 
 ### Step 2: Modbus Driver Implementation
@@ -33,13 +34,13 @@ You are a Senior Embedded Systems Engineer expert in:
 * Handle Modbus exceptions gracefully (do not crash on timeout).
 
 ### Step 3: UI Implementation
-* Library: `TFT_eSPI`.
-* Orientation: Landscape (Rotation 1 or 3).
+* Library: `LVGL` (with TFT_eSPI as display driver).
+* Orientation: Landscape.
 * **Design Philosophy:** "At-a-glance" readability.
     * **Center:** Huge Font for Battery %.
     * **Bottom Left:** PV Production (Yellow/Green).
     * **Bottom Right:** House Consumption (Blue/Red).
-* Use `TFT_eSPI_Sprite` to eliminate flickering during updates.
+* Use LVGL widgets and buffering to handle updates efficiently.
 
 ## Quality Assurance Rules
 * Never use blocking delays (`delay()`) in the main loop; use `millis()` timers.
