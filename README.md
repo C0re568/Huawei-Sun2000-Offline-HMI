@@ -5,9 +5,11 @@
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg) ![Platform](https://img.shields.io/badge/platform-ESP32--S3-green) ![Framework](https://img.shields.io/badge/framework-Arduino%20%7C%20PlatformIO-orange)
 
-A standalone, network-independent hardware monitor for Huawei SUN2000 Inverters and Luna2000 Battery Storage systems.
+A standalone, network-independent hardware monitor for Huawei SUN2000 Inverters and Luna2000 Battery Storage systems, with optional WiFi support for web interface and testing on boards without display.
 
-**Key Feature:** Direct RS485 (Modbus RTU) communication ensures real-time system visibility (SOC, PV Yield, House Load) even during network outages or in grid-independent "Island Mode," without relying on Wi-Fi, the FusionSolar App, or Cloud servers.
+**Key Features:**
+* Direct RS485 (Modbus RTU) communication ensures real-time system visibility (SOC, PV Yield, House Load) even during network outages or in grid-independent "Island Mode," without relying on Wi-Fi, the FusionSolar App, or Cloud servers.
+* Optional WiFi support provides a web dashboard and REST API endpoint for remote monitoring and testing.
 
 ---
 
@@ -34,7 +36,7 @@ This project solves that by reading data directly from the inverter's COM port u
 **Monitored Metrics:**
 * **Battery SOC:** Luna2000 State of Charge (%)
 * **PV Input:** Current solar production (Watts)
-* **Grid Status:** Active power to/from grid (Watts)
+* **Grid Status:** Active power to/from grid (Watts) - negative values indicate consumption from grid, positive indicate feed-in to grid
 
 ## 🛠 Hardware Requirements
 * **Microcontroller:** [LILYGO® T-Display-S3](https://github.com/Xinyuan-LilyGO/T-Display-S3) (ESP32-S3 with 1.9" ST7789 LCD).
@@ -80,17 +82,21 @@ The T-Display-S3 uses an 8-bit parallel interface for the screen. RS485 communic
 2.  **Open in PlatformIO:**
     Open the project folder in VS Code. PlatformIO should automatically detect the `platformio.ini` file.
 3.  **Install Dependencies:**
-    PlatformIO will automatically download `TFT_eSPI` and `ModbusMaster` libraries upon first build.
+    PlatformIO will automatically download `LVGL` and `ModbusMaster` libraries upon first build.
 4.  **Build & Upload:**
     Connect your T-Display-S3 via USB and click the **Upload** (Arrow) button in the PlatformIO toolbar.
+5.  **(Optional) Configure WiFi:**
+    If using WiFi for web interface and testing, update the SSID and password in `src/main.cpp`.
 
 ## 🖥 Usage
-Once powered on, the device will attempt to connect via Modbus ID 1 (default). 
+Once powered on, the device will attempt to connect via Modbus ID 1 (default).
 * **Startup:** Shows a "Connecting..." screen.
 * **Normal Operation:** Updates values every 2 seconds.
 * **Error State:** If communication fails (timeout > 5s), the values will turn **Orange/Red** to indicate stale data.
+* **Web Interface (Optional):** If WiFi is enabled, access the web dashboard at `http://<device-ip>` for remote monitoring. The REST API endpoint `/api/data` provides JSON data for integration.
 
 ## 🗺 Roadmap
+- [x] WiFi web dashboard and REST API for remote access.
 - [ ] Implement Touchscreen support for page switching (Detail View).
 - [ ] MQTT optional uplink for Home Assistant integration when Wi-Fi is available to not need Hawei Cloud connection all the time.
 

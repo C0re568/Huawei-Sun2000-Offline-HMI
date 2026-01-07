@@ -1,7 +1,7 @@
 # AI Development Guidelines & Workflow
 
 ## Project Context
-We are building a C++ firmware for the **LilyGO T-Display-S3** to monitor a Huawei Solar System via **RS485/Modbus RTU**. The device must work autonomously without Wi-Fi.
+We are building a C++ firmware for the **LilyGO T-Display-S3** to monitor a Huawei Solar System via **RS485/Modbus RTU**. The device works autonomously without Wi-Fi, but optional WiFi support is added for web interface and testing.
 
 ## Role Definition
 You are a Senior Embedded Systems Engineer expert in:
@@ -25,12 +25,13 @@ You are a Senior Embedded Systems Engineer expert in:
 
 ### Step 2: Modbus Driver Implementation
 * Create a dedicated class `HuaweiInverter`.
+* Use the ModbusMaster library for Modbus RTU communication.
 * Use `HardwareSerial` (Serial1) on **Pins 43 (TX)** and **44 (RX)**.
 * Baudrate: **9600**, Config: **8N1**.
 * Implement a non-blocking `update()` method that polls:
     * Register 37760 (SOC)
     * Register 32064 (Input Power)
-    * Register 37113 (Active Power)
+    * Register 37113 (Active Power - negative values indicate grid consumption, positive indicate feed-in to grid)
 * Handle Modbus exceptions gracefully (do not crash on timeout).
 
 ### Step 3: UI Implementation
@@ -41,6 +42,12 @@ You are a Senior Embedded Systems Engineer expert in:
     * **Bottom Left:** PV Production (Yellow/Green).
     * **Bottom Right:** House Consumption (Blue/Red).
 * Use LVGL widgets and buffering to handle updates efficiently.
+
+### Step 4: WiFi and Web Server Implementation
+* **Setup Routine:** Implement a setup routine where the device attempts to connect to saved WiFi credentials on startup. If connection fails or no credentials are saved, start an Access Point (AP) mode for web-based configuration, allowing users to input SSID and password via a captive portal or simple web page.
+* **Web Server with Dashboard:** Set up an asynchronous web server (e.g., ESPAsyncWebServer) to serve a simple HTML dashboard displaying solar system data. Include basic styling for readability.
+* **REST GET Endpoint for JSON Data:** Provide a GET endpoint (e.g., /api/data) that returns JSON with current SOC, input power, and active power values.
+* **Compatibility with Boards without Display:** Ensure the firmware compiles and runs on ESP32 boards without display hardware by conditionally including display-related code.
 
 ## Quality Assurance Rules
 * Never use blocking delays (`delay()`) in the main loop; use `millis()` timers.
