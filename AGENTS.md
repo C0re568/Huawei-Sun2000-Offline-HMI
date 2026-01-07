@@ -21,6 +21,7 @@ You are a Senior Embedded Systems Engineer expert in:
     * `-D TFT_BL=38` (Backlight)
     * `-D LOAD_GLCD`, `-D LOAD_FONT2`, `-D LOAD_FONT4` (Fonts)
 * **Dependencies:** Add `lvgl` to `lib_deps` in `platformio.ini` for UI library support.
+* **Board Library:** Add the library from https://github.com/Xinyuan-LilyGO/T-Display-S3.git to `lib_deps` in `platformio.ini` for board-specific support. The AI agent should use the examples from the GitHub repository as reference for implementation guidance. It may be best practice to add the whole GitHub repository into a sub directory (e.g., lib/T-Display-S3) for local access.
 * **USB Mode:** Ensure `USB_CDC_ON_BOOT` is enabled so standard `Serial` works over USB while we use `Serial1` for RS485.
 
 ### Step 2: Modbus Driver Implementation
