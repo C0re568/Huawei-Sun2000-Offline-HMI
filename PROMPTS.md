@@ -5,9 +5,10 @@
 ## Prompt 1: Project Initialization
 > "Act as a Senior Embedded Engineer. Keep @AGENTS.md in mind! Initialize the 'Huawei-Sun2000-Offline-HMI' project for the LilyGO T-Display-S3. 
 > Git clone the official repository for the LilyGO T-Display-S3 into a subdirectory named 'offficial_repository' and use the lib directory from there.
-> create a .gitignore
-> 1. Create a `platformio.ini` file with the specific 8-bit parallel build flags defined in `AGENTS.md` (Step 1).
-> 2. Create a `main.cpp` that initializes the TFT display, turns on the backlight (GPIO 38) and Power (GPIO 15), and displays a 'System Booting...' message to verify hardware."
+> 1. Create a `platformio.ini`. Use the platformio.ini from offficial_repository as reference.
+> 2. Create a `.gitignore` file to exclude build artifacts, temporary files, and sensitive information.
+> 3. Create a `lib` directory and copy the necessary libraries from the official repository.
+> 4. Create a `main.cpp` that initializes the TFT display, turns on the backlight (GPIO 38) and Power (GPIO 15), and displays a 'System Booting...' message to verify hardware."
 
 ## Prompt 2: Modbus Driver Implementation
 > "Act as a Senior Embedded Engineer. Keep @AGENTS.md in mind! 
