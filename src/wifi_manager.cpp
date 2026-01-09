@@ -87,6 +87,10 @@ void WiFiManager::handleConfigure(AsyncWebServerRequest* request) {
     }
 }
 
+bool WiFiManager::getConnectionStatus() {
+    return isConnected;
+}
+
 void WiFiManager::handleApiData(AsyncWebServerRequest* request) {
     HuaweiInverter& inverter = HuaweiInverter::getInstance();
 

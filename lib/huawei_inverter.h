@@ -46,6 +46,7 @@ public:
     int getSoc() const { return _soc; }
     int getInputPower() const { return _inputPower; }
     int getActivePower() const { return _activePower; }
+    bool isConnected() const { return _lastReadSuccessful; }
 
 private:
     // Private constructor for singleton
@@ -62,15 +63,18 @@ private:
     int _soc = 0;
     int _inputPower = 0;
     int _activePower = 0;
+    bool _lastReadSuccessful = false;
 
     // Read a single Modbus register
     uint16_t readRegister(uint16_t reg) {
         uint8_t result = node.readHoldingRegisters(reg, 1);
         
         if (result == node.ku8MBSuccess) {
+            _lastReadSuccessful = true;
             return node.getResponseBuffer(0);
         } else {
             // Handle Modbus error
+            _lastReadSuccessful = false;
             Serial.print("Modbus read error for register ");
             Serial.print(reg);
             Serial.print(": ");

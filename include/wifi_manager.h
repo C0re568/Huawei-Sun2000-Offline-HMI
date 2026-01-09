@@ -12,6 +12,7 @@ class WiFiManager {
 public:
     static void begin();
     static void loop();
+    static bool getConnectionStatus();
 
 private:
     static AsyncWebServer server;
