@@ -1,4 +1,5 @@
 #include "ui.h"
+#include "wifi_manager.h"
 
 #ifdef HAS_DISPLAY
 
@@ -8,6 +9,10 @@ lv_disp_t* UI::disp = nullptr;
 lv_obj_t* UI::soc_label = nullptr;
 lv_obj_t* UI::input_power_label = nullptr;
 lv_obj_t* UI::active_power_label = nullptr;
+lv_obj_t* UI::modbus_status_label = nullptr;
+lv_obj_t* UI::wifi_status_label = nullptr;
+lv_obj_t* UI::modbus_status_icon = nullptr;
+lv_obj_t* UI::wifi_status_icon = nullptr;
 
 void UI::begin() {
     tft_init();
@@ -63,6 +68,29 @@ void UI::create_ui() {
     lv_label_set_text(active_power_label, "Active Power: -- W");
     lv_obj_set_style_text_color(active_power_label, lv_color_hex(0xFFFF00), 0);
     lv_obj_align(active_power_label, LV_ALIGN_CENTER, -50, 30);
+
+    // Status Indicators
+    // Modbus Status
+    modbus_status_label = lv_label_create(screen);
+    lv_label_set_text(modbus_status_label, "Modbus");
+    lv_obj_set_style_text_color(modbus_status_label, lv_color_hex(0xFFFFFF), 0);
+    lv_obj_align(modbus_status_label, LV_ALIGN_BOTTOM_LEFT, 10, -20);
+
+    modbus_status_icon = lv_obj_create(screen);
+    lv_obj_set_size(modbus_status_icon, 20, 20);
+    lv_obj_align_to(modbus_status_icon, modbus_status_label, LV_ALIGN_OUT_RIGHT_MID, 10, 0);
+    setStatusIconColor(modbus_status_icon, DISCONNECTED);
+
+    // WiFi Status
+    wifi_status_label = lv_label_create(screen);
+    lv_label_set_text(wifi_status_label, "WiFi");
+    lv_obj_set_style_text_color(wifi_status_label, lv_color_hex(0xFFFFFF), 0);
+    lv_obj_align(wifi_status_label, LV_ALIGN_BOTTOM_RIGHT, -10, -20);
+
+    wifi_status_icon = lv_obj_create(screen);
+    lv_obj_set_size(wifi_status_icon, 20, 20);
+    lv_obj_align_to(wifi_status_icon, wifi_status_label, LV_ALIGN_OUT_LEFT_MID, -10, 0);
+    setStatusIconColor(wifi_status_icon, DISCONNECTED);
 }
 
 void UI::update() {
@@ -80,8 +108,89 @@ void UI::update() {
     snprintf(buffer, sizeof(buffer), "Active Power: %d W", inverter.getActivePower());
     lv_label_set_text(active_power_label, buffer);
 
+    // Update Modbus connection status
+    ConnectionStatus modbusStatus = inverter.isConnected() ? CONNECTED : DISCONNECTED;
+    updateModbusStatus(modbusStatus);
+
+    // Update WiFi connection status
+    bool isWiFiConnected = WiFiManager::getConnectionStatus();
+    ConnectionStatus wifiStatus = isWiFiConnected ? CONNECTED : DISCONNECTED;
+    updateWiFiStatus(wifiStatus);
+
     // Trigger LVGL rendering
     lv_task_handler();
+}
+
+void UI::setStatusIconColor(lv_obj_t* icon, ConnectionStatus status) {
+    if (!icon) return;
+
+    lv_color_t color;
+    switch (status) {
+        case DISCONNECTED:
+            color = lv_color_hex(0xFF0000);  // Red
+            break;
+        case CONNECTING:
+            color = lv_color_hex(0xFFFF00);  // Yellow
+            break;
+        case CONNECTED:
+            color = lv_color_hex(0x00FF00);  // Green
+            break;
+        case ERROR:
+            color = lv_color_hex(0xFF6600);  // Orange
+            break;
+        default:
+            color = lv_color_hex(0x808080);  // Gray
+    }
+
+    lv_obj_set_style_bg_color(icon, color, 0);
+    lv_obj_set_style_border_width(icon, 0, 0);
+    lv_obj_set_style_radius(icon, LV_RADIUS_CIRCLE, 0);
+}
+
+void UI::updateModbusStatus(ConnectionStatus status) {
+    if (!modbus_status_label || !modbus_status_icon) return;
+
+    // Update icon color
+    setStatusIconColor(modbus_status_icon, status);
+
+    // Update label text
+    switch (status) {
+        case DISCONNECTED:
+            lv_label_set_text(modbus_status_label, "Modbus: Disconnected");
+            break;
+        case CONNECTING:
+            lv_label_set_text(modbus_status_label, "Modbus: Connecting");
+            break;
+        case CONNECTED:
+            lv_label_set_text(modbus_status_label, "Modbus: Connected");
+            break;
+        case ERROR:
+            lv_label_set_text(modbus_status_label, "Modbus: Error");
+            break;
+    }
+}
+
+void UI::updateWiFiStatus(ConnectionStatus status) {
+    if (!wifi_status_label || !wifi_status_icon) return;
+
+    // Update icon color
+    setStatusIconColor(wifi_status_icon, status);
+
+    // Update label text
+    switch (status) {
+        case DISCONNECTED:
+            lv_label_set_text(wifi_status_label, "WiFi: Disconnected");
+            break;
+        case CONNECTING:
+            lv_label_set_text(wifi_status_label, "WiFi: Connecting");
+            break;
+        case CONNECTED:
+            lv_label_set_text(wifi_status_label, "WiFi: Connected");
+            break;
+        case ERROR:
+            lv_label_set_text(wifi_status_label, "WiFi: Error");
+            break;
+    }
 }
 
 void UI::disp_flush_cb(lv_disp_drv_t* disp_drv, const lv_area_t* area, lv_color_t* color_p) {

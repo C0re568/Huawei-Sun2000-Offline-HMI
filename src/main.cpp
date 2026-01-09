@@ -42,4 +42,20 @@ void loop() {
 
     // WiFi and web server handling
     WiFiManager::loop();
+
+#ifdef HAS_DISPLAY
+    // Update status indicators
+    static unsigned long lastStatusUpdate = 0;
+    if (currentMillis - lastStatusUpdate >= 1000) {
+        // Update WiFi status
+        ConnectionStatus wifiStatus = WiFiManager::getConnectionStatus() ? CONNECTED : DISCONNECTED;
+        UI::updateWiFiStatus(wifiStatus);
+
+        // Update Modbus status (assuming a method exists in HuaweiInverter to check connection)
+        ConnectionStatus modbusStatus = HuaweiInverter::getInstance().isConnected() ? CONNECTED : DISCONNECTED;
+        UI::updateModbusStatus(modbusStatus);
+
+        lastStatusUpdate = currentMillis;
+    }
+#endif
 }
