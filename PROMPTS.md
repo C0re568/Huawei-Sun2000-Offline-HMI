@@ -1,28 +1,13 @@
 # Prompts for Kilo Code AI / AI Agents
 
+### Prompt 1: Project Setup & HAL
+> "Act as a Senior Embedded Engineer. Following the principles in `AGENTS.md`, set up the PlatformIO project structure to support multiple hardware targets (LILYGO T-Display-S3, Waveshare ESP32-S3-1.47, and a generic ESP32). Create the `platformio.ini` with environments for each board, and establish the `lib/hal` directory with corresponding configuration files. Ensure build flags correctly define features like `HAS_DISPLAY` for each environment."
 
+### Prompt 2: Modbus Driver Implementation
+> "Act as a Senior Embedded Engineer. Implement the `HuaweiInverter` class as a reusable Modbus driver using the `ModbusMaster` library. Configure it for `HardwareSerial` (Serial1) on pins 43 (TX) and 44 (RX) at 9600 baud, 8N1. Create a non-blocking `update()` method to poll registers 37760 (SOC), 32064 (Input Power), and 37113 (Active Power), ensuring graceful handling of Modbus exceptions."
 
-## Prompt 1: Project Initialization
-> "Act as a Senior Embedded Engineer. Keep @AGENTS.md in mind! Initialize the 'Huawei-Sun2000-Offline-HMI' project for the LilyGO T-Display-S3. 
-> Git clone the official repository for the LilyGO T-Display-S3 into a subdirectory named 'offficial_repository' and use the lib directory from there.
-> 1. Create a `platformio.ini`. Use the platformio.ini from offficial_repository as reference.
-> 2. Create a `.gitignore` file to exclude build artifacts, temporary files, and sensitive information.
-> 3. Create a `lib` directory and copy the necessary libraries from the official repository.
-> 4. Create a `main.cpp` that initializes the TFT display, turns on the backlight (GPIO 38) and Power (GPIO 15), and displays a 'System Booting...' message to verify hardware."
+### Prompt 3: Conditional UI Implementation
+> "Act as a Senior Embedded Engineer. Integrate the LVGL library to create a user interface that is conditionally compiled based on the `HAS_DISPLAY` feature flag. The UI should display key data from the inverter (SOC, Input Power, Active Power) in a clear, at-a-glance format. Use a suitable display driver like LovyanGFX or TFT_eSPI, managed through the HAL."
 
-## Prompt 2: Modbus Driver Implementation
-> "Act as a Senior Embedded Engineer. Keep @AGENTS.md in mind! 
-> "Create the HuaweiInverter class using ModbusMaster library on Serial1 (pins 43 TX, 44 RX), baud 9600, 8N1. Implement non-blocking update() method to poll registers 37760 (SOC), 32064 (Input Power), 37113 (Active Power). Handle exceptions gracefully."
-
-## Prompt 3: UI Implementation
-> "Act as a Senior Embedded Engineer. Keep @AGENTS.md in mind! 
-> "Integrate LVGL with TFT_eSPI driver for landscape orientation. Design "at-a-glance" UI with huge battery % in center, PV production bottom left (yellow/green), house consumption bottom right (blue/red). Use efficient widgets and buffering."
-
-## Prompt 4: WiFi and Web Server Implementation
-> "Act as a Senior Embedded Engineer. Keep @AGENTS.md in mind! 
-> Setup Routine: Implement a setup routine where the device attempts to connect to saved WiFi credentials on startup. If connection fails or no credentials are saved, start an Access Point (AP) mode for web-based configuration, allowing users to input SSID and password via a captive portal or simple web page.
-> Web Server with Dashboard: Set up an asynchronous web server (e.g., ESPAsyncWebServer) to serve a simple HTML dashboard displaying solar system data. Include basic styling for readability.
-> REST GET Endpoint for JSON Data: Provide a GET endpoint (e.g., /api/data) that returns JSON with current SOC, input power, and active power values.
-> Compatibility with Boards without Display: Ensure the firmware compiles and runs on ESP32 boards without display hardware by conditionally including display-related code.
-
-
+### Prompt 4: WiFi and Web Server
+> "Act as a Senior Embedded Engineer. Implement a WiFi manager that starts a captive portal for credential configuration if a connection fails. Add an asynchronous web server that provides a data dashboard and a `/api/data` JSON endpoint. This feature should be fully functional on headless boards."
