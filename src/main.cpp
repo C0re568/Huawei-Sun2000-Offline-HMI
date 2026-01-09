@@ -1,64 +1,45 @@
 #include <Arduino.h>
-#include "config.h"
-#include "modbus_interface.h"
+#include <config.h>
+#include "huawei_inverter.h"
 
 #ifdef HAS_DISPLAY
-    #include <lvgl.h>
+#include "ui.h"
 #endif
 
-// Global Modbus interface
-HuaweiInverterInterface* inverterInterface = nullptr;
+#include "wifi_manager.h"
 
 void setup() {
-    // Initialize serial for debugging
     Serial.begin(115200);
 
-    // Initialize Modbus interface
-    inverterInterface = new HuaweiInverterInterface(MODBUS_SERIAL_PORT);
-    if (inverterInterface->begin()) {
-        Serial.println("Modbus interface initialized successfully");
-    } else {
-        Serial.println("Failed to initialize Modbus interface");
-    }
+    // Initialize Modbus Inverter
+    HuaweiInverter& inverter = HuaweiInverter::getInstance();
+    inverter.begin();
 
-    #ifdef HAS_DISPLAY
-        // Initialize LVGL
-        lv_init();
-        
-        // TODO: Add display driver initialization specific to the board
-        // This will depend on the specific display used (parallel or SPI)
-    #endif
+    // Initialize WiFi
+    WiFiManager::begin();
+
+#ifdef HAS_DISPLAY
+    // Initialize UI
+    UI::begin();
+#endif
 }
 
 void loop() {
-    if (inverterInterface) {
-        float socValue, inputPower, activePower;
-        
-        if (inverterInterface->readSoC(socValue)) {
-            Serial.print("State of Charge: ");
-            Serial.print(socValue);
-            Serial.println("%");
-        }
-        
-        if (inverterInterface->readInputPower(inputPower)) {
-            Serial.print("Input Power: ");
-            Serial.print(inputPower);
-            Serial.println(" W");
-        }
-        
-        if (inverterInterface->readActivePower(activePower)) {
-            Serial.print("Active Power: ");
-            Serial.print(activePower);
-            Serial.println(" W");
-        }
+    // Non-blocking updates
+    static unsigned long lastUpdate = 0;
+    unsigned long currentMillis = millis();
+
+    // Modbus update every 5 seconds
+    if (currentMillis - lastUpdate >= 5000) {
+        HuaweiInverter::getInstance().update();
+        lastUpdate = currentMillis;
+
+#ifdef HAS_DISPLAY
+        // Update UI with latest inverter data
+        UI::update();
+#endif
     }
 
-    #ifdef HAS_DISPLAY
-        // TODO: Add LVGL display update logic
-        // lv_task_handler();
-    #endif
-
-    delay(5000); // Update every 5 seconds
+    // WiFi and web server handling
+    WiFiManager::loop();
 }
-
-// Optional: Add error handling or interrupt handlers as needed
