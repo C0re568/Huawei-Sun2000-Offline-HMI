@@ -1,118 +1,162 @@
-# Huawei SUN2000 Offline HMI (Resilience Edition)
+# Huawei Sun2000 Offline HMI
 
-> [!WARNING]
-> **DRAFT PROJECT:** This repository is currently a concept and development draft. It is **not yet a finished, implemented, or hardware-tested project**. Use the code and wiring diagrams at your own risk. Hardware verification is still in progress.
+## 🌞 Project Overview
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg) ![Platform](https://img.shields.io/badge/platform-ESP32--S3-green) ![Framework](https://img.shields.io/badge/framework-Arduino%20%7C%20PlatformIO-orange)
+The Huawei Sun2000 Offline HMI is an advanced, flexible monitoring solution for Huawei Solar Inverters, designed to provide real-time insights into solar energy production and system status. This project offers a versatile, embedded system approach to inverter monitoring across multiple hardware platforms.
 
-A standalone, network-independent hardware monitor for Huawei SUN2000 Inverters and Luna2000 Battery Storage systems, with optional WiFi support for web interface and testing on boards without display.
+### Key Features
 
-**Key Features:**
-* Direct RS485 (Modbus RTU) communication ensures real-time system visibility (SOC, PV Yield, House Load) even during network outages or in grid-independent "Island Mode," without relying on Wi-Fi, the FusionSolar App, or Cloud servers.
-* Optional WiFi support provides a web dashboard and REST API endpoint for remote monitoring and testing.
+- 📊 Real-time solar inverter data monitoring
+- 🔌 Multi-board support with hardware abstraction
+- 📡 Modbus RTU communication
+- 🌐 Optional WiFi web interface
+- 📱 Adaptive UI for different display sizes
 
----
+### Supported Huawei Inverter Models
 
-## 📋 Table of Contents
-- [About the Project](#about-the-project)
-- [Hardware Requirements](#hardware-requirements)
-- [Wiring & Pinout](#wiring--pinout)
-- [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-- [Usage](#usage)
-- [Roadmap](#roadmap)
-- [Contributing](#contributing)
-- [License](#license)
-- [Acknowledgments](#acknowledgments)
+- Huawei Sun2000-L1 Series
+- Huawei Sun2000-L2 Series
+- Huawei Sun2000-L3 Series
 
----
+## 🖥️ Supported Hardware
 
-## 🧐 About the Project
-Standard monitoring solutions for Huawei inverters rely on cloud connectivity. In a power outage (blackout) or internet failure, users often lose visibility into their battery status just when they need it most. 
+### Boards
 
-This project solves that by reading data directly from the inverter's COM port using the **Modbus RTU** protocol. It visualizes this data on a low-power **LilyGO T-Display-S3**, providing a robust "Resilience Dashboard."
+1. **LILYGO T-Display-S3**
+   - 1.9" ST7789 Display
+   - 8-Bit Parallel Interface
+   - Full feature support
 
-**Monitored Metrics:**
-* **Battery SOC:** Luna2000 State of Charge (%)
-* **PV Input:** Current solar production (Watts)
-* **Grid Status:** Active power to/from grid (Watts) - negative values indicate consumption from grid, positive indicate feed-in to grid
+2. **Waveshare ESP32-S3-1.47**
+   - 1.47" LCD
+   - SPI Interface
+   - Integrated SD Card Slot
 
-## 🛠 Hardware Requirements
-* **Microcontroller:** [LILYGO® T-Display-S3](https://github.com/Xinyuan-LilyGO/T-Display-S3) (ESP32-S3 with 1.9" ST7789 LCD).
-* **Communication:** RS485-to-TTL Adapter (3.3V Logic).
-* **Cabling:** Twisted pair cable (CAT5e/6 recommended).
-* **Power:** USB-C (5V) or LiPo Battery (3.7V).
+3. **Generic ESP32**
+   - Headless Configuration
+   - Web Interface Only
+   - Modbus Communication
 
-## 🔌 Wiring & Pinout
-The T-Display-S3 uses an 8-bit parallel interface for the screen. RS485 communication is mapped to the side headers.
+### Feature Matrix
 
-### ESP32-S3 to RS485 Adapter
-| ESP32-S3 Pin | RS485 Adapter | Function |
-| :--- | :--- | :--- |
-| **3.3V / 5V** | VCC | Power for Adapter |
-| **GND** | GND | Common Ground |
-| **GPIO 43** | DI (TX) | Data Transmit |
-| **GPIO 44** | RO (RX) | Data Receive |
-| *Auto* | DE/RE | (Use Auto-Flow adapter or tie high/low) |
+| Feature       | T-Display-S3 | Waveshare ESP32-S3 | Generic ESP32 |
+|--------------|--------------|-------------------|---------------|
+| Display      | ✅ Full      | ✅ Full           | ❌ None       |
+| Touch        | ❌ No        | ❌ No             | ❌ No         |
+| SD Card      | ❌ No        | ✅ Yes            | ❌ No         |
+| Web Interface| ✅ Yes       | ✅ Yes            | ✅ Yes        |
+| Modbus       | ✅ Yes       | ✅ Yes            | ✅ Yes        |
 
-### RS485 Adapter to Huawei COM Connector
-| RS485 Adapter | Huawei COM Pin | Signal |
-| :--- | :--- | :--- |
-| **A (+)** | Pin 1 (or 3) | RS485 A (Data +) |
-| **B (-)** | Pin 2 (or 4) | RS485 B (Data -) |
-| **GND** | Pin 5 (optional) | Shield/Ground |
+## 🗂️ Project Structure
 
-> **Note:** Consult your specific Huawei SUN2000 manual. Pins 1/2 are usually dominant, but cascaded systems may use 3/4.
+```
+Huawei-Sun2000-Offline-HMI/
+│
+├── lib/
+│   └── hal/                   # Hardware Abstraction Layer
+│       ├── generic_esp32.h
+│       ├── lilygo_t_display_s3.h
+│       └── waveshare_esp32_s3_1_47.h
+│
+├── src/                       # Main application source
+│   ├── main.cpp
+│   ├── modbus_driver.cpp
+│   └── ui/
+│
+├── platformio.ini             # PlatformIO Configuration
+└── README.md
+```
 
----
+### Hardware Abstraction Layer (HAL)
+
+The HAL provides a flexible, feature-flag-based approach to hardware configuration:
+
+- Separate hardware initialization from application logic
+- Use feature flags like `HAS_DISPLAY`, `HAS_TOUCH`
+- Board-specific pin definitions and configurations
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-* **VS Code** with **PlatformIO** extension installed.
-* **Git** for cloning the repository.
-* USB-C Data Cable.
+
+- [PlatformIO IDE](https://platformio.org/install/ide) or [PlatformIO Core](https://docs.platformio.org/en/latest/core/installation/index.html)
+- [Visual Studio Code](https://code.visualstudio.com/) (recommended)
+- USB-to-Serial Adapter (for programming)
 
 ### Installation
-1.  **Clone the repository:**
-    ```bash
-    git clone [https://github.com/YourUsername/Huawei-Sun2000-Offline-HMI.git](https://github.com/YourUsername/Huawei-Sun2000-Offline-HMI.git)
-    ```
-2.  **Open in PlatformIO:**
-    Open the project folder in VS Code. PlatformIO should automatically detect the `platformio.ini` file.
-3.  **Install Dependencies:**
-    PlatformIO will automatically download `LVGL` and `ModbusMaster` libraries upon first build.
-4.  **Build & Upload:**
-    Connect your T-Display-S3 via USB and click the **Upload** (Arrow) button in the PlatformIO toolbar.
-5.  **(Optional) Configure WiFi:**
-    If using WiFi for web interface and testing, update the SSID and password in `src/main.cpp`.
 
-## 🖥 Usage
-Once powered on, the device will attempt to connect via Modbus ID 1 (default).
-* **Startup:** Shows a "Connecting..." screen.
-* **Normal Operation:** Updates values every 2 seconds.
-* **Error State:** If communication fails (timeout > 5s), the values will turn **Orange/Red** to indicate stale data.
-* **Web Interface (Optional):** If WiFi is enabled, access the web dashboard at `http://<device-ip>` for remote monitoring. The REST API endpoint `/api/data` provides JSON data for integration.
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/Huawei-Sun2000-Offline-HMI.git
+   cd Huawei-Sun2000-Offline-HMI
+   ```
 
-## 🗺 Roadmap
-- [x] WiFi web dashboard and REST API for remote access.
-- [ ] Implement Touchscreen support for page switching (Detail View).
-- [ ] MQTT optional uplink for Home Assistant integration when Wi-Fi is available to not need Hawei Cloud connection all the time.
+2. Open the project in PlatformIO
+
+### Board Selection and Compilation
+
+Select your target board in `platformio.ini`:
+
+```ini
+[env:lilygo-t-display-s3]
+platform = espressif32
+board = esp32-s3-devkit
+framework = arduino
+build_flags =
+    -D HAS_DISPLAY
+    -D LILYGO_T_DISPLAY_S3
+    ; Pin definitions...
+```
+
+Compile for your board:
+```bash
+pio run -e lilygo-t-display-s3
+```
+
+## ⚙️ Configuration
+
+### Build Flags
+
+Key build flags control feature inclusion:
+
+- `HAS_DISPLAY`: Enable display rendering
+- `HAS_TOUCH`: Enable touch input
+- `HAS_SDCARD`: Enable SD card functionality
+
+### Modbus Communication
+
+Configure Modbus settings in `src/modbus_driver.cpp`:
+
+```cpp
+#define MODBUS_BAUD 9600
+#define MODBUS_RX_PIN 43
+#define MODBUS_TX_PIN 44
+```
+
+## 🔧 Troubleshooting
+
+### Common Issues
+
+1. **No Modbus Communication**
+   - Verify serial connection settings
+   - Check inverter address
+   - Ensure correct RX/TX pins
+
+2. **Display Not Working**
+   - Verify build flags
+   - Check pin definitions
+   - Confirm display driver initialization
+
+### Debugging Tips
+
+- Use serial monitor: `pio device monitor`
+- Enable verbose output: `pio run -v`
+- Check build flags and HAL configuration
+
+## 📜 License
+
+[Insert License Information]
 
 ## 🤝 Contributing
-Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
 
-1.  Fork the Project
-2.  Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3.  Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4.  Push to the Branch (`git push origin feature/AmazingFeature`)
-5.  Open a Pull Request
-
-## 📄 License
-Distributed under the MIT License. See `LICENSE` for more information.
-
-## 👏 Acknowledgments
-* **LilyGO** for the excellent hardware documentation.
-* **Huawei** for the transparent Modbus Interface Definitions.
-* Generated with the assistance of **Google Gemini** & **Kilo Code AI**.
+Contributions are welcome! Please read the contributing guidelines before getting started.

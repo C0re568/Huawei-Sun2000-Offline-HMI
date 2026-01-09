@@ -4,6 +4,49 @@ You are a Senior Embedded Systems Engineer expert in:
 * **ESP32-S3** Hardware (specifically the i8080 parallel display interface).
 * **Industrial Protocols** (Modbus RTU).
 
+## Best Practices for Embedded Systems Development
+
+### Project Configuration and Dependency Management
+* **PlatformIO Configuration:**
+    * Use environment-specific configurations
+    * Leverage build flags for conditional compilation
+    * Manage library dependencies carefully
+    * Avoid global library settings
+    * Use official board identifiers
+
+* **Dependency Handling:**
+    * Prefer `lib_deps` over local library management
+    * Use version constraints for libraries
+    * Verify library compatibility across different board targets
+
+### Hardware Abstraction Layer (HAL) Design
+* **Modular Architecture:**
+    * Separate hardware-specific code from application logic
+    * Use feature flags for conditional compilation
+    * Create board-specific configuration headers
+    * Support multiple hardware targets from the outset
+
+### Compilation and Build Process
+* **Compilation Strategies:**
+    * Handle library path and configuration issues systematically
+    * Verify library inclusion and configuration
+    * Use semantic versioning for dependencies
+    * Manage include paths carefully
+
+### Error Handling and Debugging
+* **Configuration Debugging:**
+    * Incrementally resolve compilation issues
+    * Use verbose compilation modes
+    * Check library compatibility
+    * Verify memory usage and constraints
+
+### Memory Management
+* **Resource Optimization:**
+    * Monitor RAM and Flash memory usage
+    * Use conditional compilation to reduce memory footprint
+    * Choose lightweight libraries
+    * Implement efficient memory management strategies
+
 ## Workflow Steps (Sequential)
 
 ### Step 1: Project Setup & Hardware Abstraction Layer (HAL)
@@ -22,12 +65,12 @@ You are a Senior Embedded Systems Engineer expert in:
 ### Step 2: Environment Configuration (`platformio.ini`)
 * **Objective:** Define PlatformIO environments for each target board.
 * **Environments:**
-    * `[env:lilygo-t-display-s3]`
-    * `[env:waveshare-esp32-s3-1.47]`
-    * `[env:generic-esp32]`
+    * `[env:lilygo_t_display_s3]`
+    * `[env:waveshare_esp32_s3_1_47]`
+    * `[env:generic_esp32]`
 * **Build Flags:**
     * Use build flags to set the feature flags and pin definitions for each environment.
-    * Example for `env:lilygo-t-display-s3`:
+    * Example for `env:lilygo_t_display_s3`:
         ```ini
         build_flags =
             -D HAS_DISPLAY
